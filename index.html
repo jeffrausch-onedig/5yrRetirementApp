@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5-Year Retirement Plan Evaluation - Setup</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>5-Year Retirement Plan Evaluation</h1>
+            <p class="subtitle">Setup Input Parameters</p>
+        </header>
+
+        <form id="planSetupForm" class="setup-form">
+            <div class="form-section">
+                <h2>Plan Demographics</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eligibleEmployees">Number of Eligible Employees</label>
+                        <input type="number" id="eligibleEmployees" name="eligibleEmployees" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="participants">Number of Participants</label>
+                        <input type="number" id="participants" name="participants" min="0" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="avgAccountBalance">Average Account Balance ($)</label>
+                        <input type="number" id="avgAccountBalance" name="avgAccountBalance" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="avgSalary">Average Participant Salary ($)</label>
+                        <input type="number" id="avgSalary" name="avgSalary" min="0" step="0.01" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Investment & Returns</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="investmentReturn">Investment Return (%)</label>
+                        <input type="number" id="investmentReturn" name="investmentReturn" min="0" max="100" step="0.01" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Contribution Rates</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="employeeContribRate">Employee Contribution Rate (%)</label>
+                        <input type="number" id="employeeContribRate" name="employeeContribRate" min="0" max="100" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="employerContribRate">Employer Contribution Rate (%)</label>
+                        <input type="number" id="employerContribRate" name="employerContribRate" min="0" max="100" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="employer401kMatch">Employer 401k Match (%)</label>
+                        <input type="number" id="employer401kMatch" name="employer401kMatch" min="0" max="100" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="participantsMaxMatch">Participants Maximizing Match (%)</label>
+                        <input type="number" id="participantsMaxMatch" name="participantsMaxMatch" min="0" max="100" step="0.01" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Auto Escalation</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="autoEscalation">Auto Escalation</label>
+                        <select id="autoEscalation" name="autoEscalation" required>
+                            <option value="">Select...</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="maxAutoEscalationRate">Max Auto Escalation Rate (%)</label>
+                        <input type="number" id="maxAutoEscalationRate" name="maxAutoEscalationRate" min="0" max="100" step="0.01">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Plan Engagement Features</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="enrollmentMethod">Enrollment Method</label>
+                        <select id="enrollmentMethod" name="enrollmentMethod" required>
+                            <option value="">Select...</option>
+                            <option value="opt-in">Opt-In (Traditional)</option>
+                            <option value="auto-enroll">Auto-Enrollment</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="defaultAutoContribRate">Default Auto-Enroll Rate (%)</label>
+                        <input type="number" id="defaultAutoContribRate" name="defaultAutoContribRate" min="0" max="100" step="0.01">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="vestingSchedule">Vesting Schedule</label>
+                        <select id="vestingSchedule" name="vestingSchedule" required>
+                            <option value="">Select...</option>
+                            <option value="immediate">Immediate</option>
+                            <option value="3-year">3-Year Cliff</option>
+                            <option value="6-year-graded">6-Year Graded</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="investmentOptions">Number of Investment Options</label>
+                        <input type="number" id="investmentOptions" name="investmentOptions" min="5" max="25" step="1" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="avgTenure">Average Employee Tenure (years)</label>
+                        <input type="number" id="avgTenure" name="avgTenure" min="1" max="40" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="avgAge">Average Participant Age</label>
+                        <input type="number" id="avgAge" name="avgAge" min="18" max="70" step="1" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Fees</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="recordKeeperFee">Record Keeper Fee ($)</label>
+                        <input type="number" id="recordKeeperFee" name="recordKeeperFee" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="advisorFee">Advisor Fee ($)</label>
+                        <input type="number" id="advisorFee" name="advisorFee" min="0" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tpaFee">TPA Fee ($)</label>
+                        <input type="number" id="tpaFee" name="tpaFee" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="investmentFee">Investment Fee ($)</label>
+                        <input type="number" id="investmentFee" name="investmentFee" min="0" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="auditFee">Audit Fee ($)</label>
+                        <input type="number" id="auditFee" name="auditFee" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="feesPaidBy">Fees Paid By</label>
+                        <select id="feesPaidBy" name="feesPaidBy" required>
+                            <option value="">Select...</option>
+                            <option value="employer">Employer</option>
+                            <option value="employee">Employee</option>
+                            <option value="split">Split</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" id="resetForm" class="btn btn-secondary">Reset Form</button>
+                <button type="button" id="engagementAnalysis" class="btn btn-success">Engagement Analysis</button>
+                <button type="submit" class="btn btn-primary">Calculate Projections</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
