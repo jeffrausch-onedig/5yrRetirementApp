@@ -44,37 +44,37 @@ document.addEventListener('DOMContentLoaded', function() {
     const feesPaidBy = setupData.feesPaidBy || 'employer';
 
     try {
-        // Calculate projections for all four scenarios
+        // Calculate projections for all scenarios
         console.log('Starting calculations...');
         const currentProjections = calculateProjections('current');
-        const optimizedProjections = calculateProjections('optimized');
         const tenPercentProjections = calculateProjections('tenPercent');
+        const fifteenPercentProjections = calculateProjections('fifteenPercent');
         const autoEnrollProjections = calculateProjections('autoEnroll');
         console.log('Projections calculated:', { 
             current: currentProjections, 
-            optimized: optimizedProjections,
             tenPercent: tenPercentProjections,
+            fifteenPercent: fifteenPercentProjections,
             autoEnroll: autoEnrollProjections
         });
         
         // Debug: Check contribution rates for each scenario
         console.log('Contribution comparison:');
         console.log('Current - Employee:', employeeContribRate + '%, Match utilization:', participantsMaxMatch + '%');
-        console.log('Optimized - Employee:', employer401kMatch + '%, Match utilization: 100%');
         console.log('10% - Employee: 10%, Match utilization:', Math.min(100, participantsMaxMatch + 30) + '%');
+        console.log('15% - Employee: 15%, Match utilization:', Math.min(100, participantsMaxMatch + 40) + '%');
         
         // Update summary cards
         console.log('Updating summary cards...');
-        updateSummaryCards(currentProjections, optimizedProjections, tenPercentProjections);
+        updateSummaryCards(currentProjections, tenPercentProjections, fifteenPercentProjections);
         
         // Create charts
         console.log('Creating charts...');
-        createChart(currentProjections, optimizedProjections, tenPercentProjections);
-        createDeltaChart(currentProjections, optimizedProjections, tenPercentProjections);
+        createChart(currentProjections, tenPercentProjections, fifteenPercentProjections);
+        createDeltaChart(currentProjections, tenPercentProjections, fifteenPercentProjections);
         
         // Populate data table
         console.log('Populating data table...');
-        populateDataTable(currentProjections, optimizedProjections, tenPercentProjections);
+        populateDataTable(currentProjections, tenPercentProjections, fifteenPercentProjections);
         
         console.log('Results page fully loaded');
     } catch (error) {
@@ -91,16 +91,16 @@ document.addEventListener('DOMContentLoaded', function() {
         let effectiveEmployeeRate = employeeContribRate;
         let effectiveMatchUtilization = participantsMaxMatch;
         
-        if (scenario === 'optimized') {
-            // In optimized scenario, employee contribution rate equals match rate
-            effectiveEmployeeRate = employer401kMatch;
-            // Assume 100% of participants maximize match in optimized scenario
-            effectiveMatchUtilization = 100;
-        } else if (scenario === 'tenPercent') {
+        if (scenario === 'tenPercent') {
             // In 10% scenario, employee contributes 10% (common retirement advice)
             effectiveEmployeeRate = 10;
             // With 10% contribution, assume near-maximum match utilization
             effectiveMatchUtilization = Math.min(100, participantsMaxMatch + 30); // Cap at 100%
+        } else if (scenario === 'fifteenPercent') {
+            // In 15% scenario, employee contributes 15% (aggressive savings rate)
+            effectiveEmployeeRate = 15;
+            // With 15% contribution, assume maximum match utilization
+            effectiveMatchUtilization = Math.min(100, participantsMaxMatch + 40); // Cap at 100%
         } else if (scenario === 'autoEnroll') {
             // Auto-enrollment scenario with behavioral modeling
             if (enrollmentMethod === 'auto-enroll') {
@@ -117,12 +117,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // Calculate monthly rates
         const monthlyReturn = investmentReturn / 100 / monthsPerYear;
         const monthlyEmployeeContrib = (effectiveEmployeeRate / 100) * avgSalary / monthsPerYear;
-        const monthlyEmployerContrib = (employerContribRate / 100) * avgSalary / monthsPerYear;
         
-        // Calculate match contribution - employer401kMatch is the MAXIMUM match as % of salary
-        // The actual match depends on how much the employee contributes and match utilization
-        const maxMatchPerMonth = (employer401kMatch / 100) * avgSalary / monthsPerYear;
-        const monthlyMatchContrib = maxMatchPerMonth * (effectiveMatchUtilization / 100);
+        // Calculate employer contributions (includes both base employer contribution AND match)
+        // Base employer contribution rate from form
+        const baseEmployerContrib = (employerContribRate / 100) * avgSalary / monthsPerYear;
+        
+        // Calculate actual match based on employee contribution and utilization
+        // Match is limited by the employee's contribution rate and the match utilization percentage
+        const employeeContribForMatch = Math.min(effectiveEmployeeRate, employer401kMatch); // Can't match more than employee contributes
+        const actualMatchRate = employeeContribForMatch * (effectiveMatchUtilization / 100);
+        const monthlyMatchContrib = (actualMatchRate / 100) * avgSalary / monthsPerYear;
+        
+        // Total employer contribution = base employer contribution + match
+        const totalMonthlyEmployerContrib = baseEmployerContrib + monthlyMatchContrib;
         
         // Calculate annual fees paid by employees
         let annualFeesPerEmployee = investmentFee; // Always paid by employee
@@ -152,17 +159,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentEmployeeRate = Math.min(currentEmployeeRate + 1, maxAutoEscalationRate);
             }
             
-            // Recalculate monthly contribution with current rate
+            // Recalculate contributions with current rate (for auto-escalation)
             const currentMonthlyEmployeeContrib = (currentEmployeeRate / 100) * avgSalary / monthsPerYear;
+            
+            // Recalculate employer match based on current employee contribution rate
+            const currentEmployeeContribForMatch = Math.min(currentEmployeeRate, employer401kMatch);
+            const currentActualMatchRate = currentEmployeeContribForMatch * (effectiveMatchUtilization / 100);
+            const currentMonthlyMatchContrib = (currentActualMatchRate / 100) * avgSalary / monthsPerYear;
+            const currentTotalMonthlyEmployerContrib = baseEmployerContrib + currentMonthlyMatchContrib;
             
             // Monthly compounding for the year
             for (let month = 0; month < monthsPerYear; month++) {
-                // Add monthly contributions
-                const monthlyContributions = currentMonthlyEmployeeContrib + monthlyEmployerContrib + monthlyMatchContrib;
+                // Add monthly contributions (employee + employer including match)
+                const monthlyContributions = currentMonthlyEmployeeContrib + currentTotalMonthlyEmployerContrib;
                 currentBalance += monthlyContributions;
                 totalAnnualContributions += monthlyContributions;
                 
-                // Apply monthly investment return
+                // Apply monthly investment return to the total balance
                 const monthlyGrowth = currentBalance * monthlyReturn;
                 currentBalance += monthlyGrowth;
                 totalInvestmentGrowth += monthlyGrowth;
@@ -207,27 +220,27 @@ document.addEventListener('DOMContentLoaded', function() {
         return (Math.pow(endBalance / startBalance, 1 / years) - 1) * 100;
     }
     
-    function updateSummaryCards(currentProjections, optimizedProjections, tenPercentProjections) {
+    function updateSummaryCards(currentProjections, tenPercentProjections, fifteenPercentProjections) {
         const startingBalance = currentProjections.annual[0].startingBalance;
         const currentEndingBalance = currentProjections.annual[currentProjections.annual.length - 1].endingBalance;
-        const optimizedEndingBalance = optimizedProjections.annual[optimizedProjections.annual.length - 1].endingBalance;
         const tenPercentEndingBalance = tenPercentProjections.annual[tenPercentProjections.annual.length - 1].endingBalance;
-        const bestCaseGain = tenPercentEndingBalance - currentEndingBalance;
+        const fifteenPercentEndingBalance = fifteenPercentProjections.annual[fifteenPercentProjections.annual.length - 1].endingBalance;
+        const bestCaseGain = fifteenPercentEndingBalance - currentEndingBalance;
         
         document.getElementById('startingBalance').textContent = formatCurrency(startingBalance);
         document.getElementById('currentEndingBalance').textContent = formatCurrency(currentEndingBalance);
-        document.getElementById('optimizedEndingBalance').textContent = formatCurrency(optimizedEndingBalance);
         document.getElementById('tenPercentEndingBalance').textContent = formatCurrency(tenPercentEndingBalance);
+        document.getElementById('fifteenPercentEndingBalance').textContent = formatCurrency(fifteenPercentEndingBalance);  
         document.getElementById('bestCaseGain').textContent = formatCurrency(bestCaseGain);
     }
     
-    function createChart(currentProjections, optimizedProjections, tenPercentProjections) {
+    function createChart(currentProjections, tenPercentProjections, fifteenPercentProjections) {
         const ctx = document.getElementById('aabChart').getContext('2d');
         
         const chartLabels = currentProjections.chart.map(p => `Year ${p.year}`);
         const currentData = currentProjections.chart.map(p => p.balance);
-        const optimizedData = optimizedProjections.chart.map(p => p.balance);
         const tenPercentData = tenPercentProjections.chart.map(p => p.balance);
+        const fifteenPercentData = fifteenPercentProjections.chart.map(p => p.balance);
         
         new Chart(ctx, {
             type: 'line',
@@ -247,8 +260,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     pointRadius: 5,
                     pointHoverRadius: 7
                 }, {
-                    label: 'Optimized (Max Match Participation)',
-                    data: optimizedData,
+                    label: '10% Employee Contribution',
+                    data: tenPercentData,
                     borderColor: '#27ae60',
                     backgroundColor: 'rgba(39, 174, 96, 0.1)',
                     borderWidth: 3,
@@ -260,8 +273,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     pointRadius: 5,
                     pointHoverRadius: 7
                 }, {
-                    label: '10% Employee Contribution',
-                    data: tenPercentData,
+                    label: '15% Employee Contribution',
+                    data: fifteenPercentData,
                     borderColor: '#e67e22',
                     backgroundColor: 'rgba(230, 126, 34, 0.1)',
                     borderWidth: 3,
@@ -343,20 +356,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    function createDeltaChart(currentProjections, optimizedProjections, tenPercentProjections) {
+    function createDeltaChart(currentProjections, tenPercentProjections, fifteenPercentProjections) {
         const ctx = document.getElementById('deltaChart').getContext('2d');
         
         const chartLabels = currentProjections.chart.map(p => `Year ${p.year}`);
         
         // Calculate deltas compared to current plan
-        const optimizedDeltas = currentProjections.chart.map((currentData, index) => {
-            const optimizedData = optimizedProjections.chart[index];
-            return optimizedData.balance - currentData.balance;
-        });
-        
         const tenPercentDeltas = currentProjections.chart.map((currentData, index) => {
             const tenPercentData = tenPercentProjections.chart[index];
             return tenPercentData.balance - currentData.balance;
+        });
+        
+        const fifteenPercentDeltas = currentProjections.chart.map((currentData, index) => {
+            const fifteenPercentData = fifteenPercentProjections.chart[index];
+            return fifteenPercentData.balance - currentData.balance;
         });
         
         new Chart(ctx, {
@@ -364,14 +377,14 @@ document.addEventListener('DOMContentLoaded', function() {
             data: {
                 labels: chartLabels,
                 datasets: [{
-                    label: 'Optimized Plan Improvement',
-                    data: optimizedDeltas,
+                    label: '10% Contribution Improvement',
+                    data: tenPercentDeltas,
                     backgroundColor: 'rgba(39, 174, 96, 0.7)',
                     borderColor: '#27ae60',
                     borderWidth: 2
                 }, {
-                    label: '10% Contribution Improvement',
-                    data: tenPercentDeltas,
+                    label: '15% Contribution Improvement',
+                    data: fifteenPercentDeltas,
                     backgroundColor: 'rgba(230, 126, 34, 0.7)',
                     borderColor: '#e67e22',
                     borderWidth: 2
@@ -454,24 +467,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    function populateDataTable(currentProjections, optimizedProjections, tenPercentProjections) {
+    function populateDataTable(currentProjections, tenPercentProjections, fifteenPercentProjections) {
         const tbody = document.getElementById('projectionTableBody');
         tbody.innerHTML = '';
         
         // Show data for every 5 years
         currentProjections.chart.forEach((currentData, index) => {
-            const optimizedData = optimizedProjections.chart[index];
             const tenPercentData = tenPercentProjections.chart[index];
-            const optDifference = optimizedData.balance - currentData.balance;
+            const fifteenPercentData = fifteenPercentProjections.chart[index];
             const tenPercentDifference = tenPercentData.balance - currentData.balance;
+            const fifteenPercentDifference = fifteenPercentData.balance - currentData.balance;
             
             const row = tbody.insertRow();
             row.insertCell(0).textContent = currentData.year;
             row.insertCell(1).textContent = formatCurrency(currentData.balance);
-            row.insertCell(2).textContent = formatCurrency(optimizedData.balance);
-            row.insertCell(3).textContent = formatCurrency(tenPercentData.balance);
-            row.insertCell(4).textContent = formatCurrency(optDifference);
-            row.insertCell(5).textContent = formatCurrency(tenPercentDifference);
+            row.insertCell(2).textContent = formatCurrency(tenPercentData.balance);
+            row.insertCell(3).textContent = formatCurrency(fifteenPercentData.balance);
+            row.insertCell(4).textContent = formatCurrency(tenPercentDifference);
+            row.insertCell(5).textContent = formatCurrency(fifteenPercentDifference);
         });
     }
     
