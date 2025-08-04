@@ -164,6 +164,71 @@ header h1 {
     box-shadow: 0 6px 12px rgba(39, 174, 96, 0.3);
 }
 
+/* Fee Structure Styles */
+.form-subsection {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.form-subsection h3 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.fee-structure-toggle {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.radio-group {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 500;
+    color: #495057;
+}
+
+.radio-group input[type="radio"] {
+    margin-right: 8px;
+    transform: scale(1.1);
+}
+
+.radio-group:hover {
+    color: #667eea;
+}
+
+.fee-inputs {
+    margin-top: 15px;
+}
+
+.fee-flat-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.fee-flat-group .form-group {
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .fee-structure-toggle {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .fee-flat-group {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {

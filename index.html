@@ -135,31 +135,104 @@
 
             <div class="form-section">
                 <h2>Fees</h2>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="recordKeeperFee">Record Keeper Fee ($)</label>
-                        <input type="number" id="recordKeeperFee" name="recordKeeperFee" min="0" step="0.01" required>
+                
+                <!-- Record Keeper Fee -->
+                <div class="form-subsection">
+                    <h3>Record Keeper Fee</h3>
+                    <div class="fee-structure-toggle">
+                        <label class="radio-group">
+                            <input type="radio" id="recordKeeperBasisPoints" name="recordKeeperFeeType" value="basisPoints" required>
+                            <span>Basis Points</span>
+                        </label>
+                        <label class="radio-group">
+                            <input type="radio" id="recordKeeperFlatPerHead" name="recordKeeperFeeType" value="flatPerHead" required>
+                            <span>Flat + Per Participant</span>
+                        </label>
                     </div>
-                    <div class="form-group">
-                        <label for="advisorFee">Advisor Fee ($)</label>
-                        <input type="number" id="advisorFee" name="advisorFee" min="0" step="0.01" required>
+                    <div class="fee-inputs">
+                        <div class="form-group" id="recordKeeperBasisPointsGroup">
+                            <label for="recordKeeperBasisPointsFee">Basis Points (0.01% = 1 bp)</label>
+                            <input type="number" id="recordKeeperBasisPointsFee" name="recordKeeperBasisPointsFee" min="0" max="500" step="0.1">
+                        </div>
+                        <div class="fee-flat-group" id="recordKeeperFlatGroup" style="display: none;">
+                            <div class="form-group">
+                                <label for="recordKeeperFlatFee">Flat Annual Fee ($)</label>
+                                <input type="number" id="recordKeeperFlatFee" name="recordKeeperFlatFee" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="recordKeeperPerHeadFee">Per Participant Fee ($)</label>
+                                <input type="number" id="recordKeeperPerHeadFee" name="recordKeeperPerHeadFee" min="0" step="0.01">
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="tpaFee">TPA Fee ($)</label>
-                        <input type="number" id="tpaFee" name="tpaFee" min="0" step="0.01" required>
+
+                <!-- Advisor Fee -->
+                <div class="form-subsection">
+                    <h3>Advisor Fee</h3>
+                    <div class="fee-structure-toggle">
+                        <label class="radio-group">
+                            <input type="radio" id="advisorBasisPoints" name="advisorFeeType" value="basisPoints" required>
+                            <span>Basis Points</span>
+                        </label>
+                        <label class="radio-group">
+                            <input type="radio" id="advisorFlatPerHead" name="advisorFeeType" value="flatPerHead" required>
+                            <span>Flat + Per Participant</span>
+                        </label>
                     </div>
-                    <div class="form-group">
-                        <label for="investmentFee">Investment Fee ($)</label>
-                        <input type="number" id="investmentFee" name="investmentFee" min="0" step="0.01" required>
+                    <div class="fee-inputs">
+                        <div class="form-group" id="advisorBasisPointsGroup">
+                            <label for="advisorBasisPointsFee">Basis Points (0.01% = 1 bp)</label>
+                            <input type="number" id="advisorBasisPointsFee" name="advisorBasisPointsFee" min="0" max="500" step="0.1">
+                        </div>
+                        <div class="fee-flat-group" id="advisorFlatGroup" style="display: none;">
+                            <div class="form-group">
+                                <label for="advisorFlatFee">Flat Annual Fee ($)</label>
+                                <input type="number" id="advisorFlatFee" name="advisorFlatFee" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="advisorPerHeadFee">Per Participant Fee ($)</label>
+                                <input type="number" id="advisorPerHeadFee" name="advisorPerHeadFee" min="0" step="0.01">
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="auditFee">Audit Fee ($)</label>
-                        <input type="number" id="auditFee" name="auditFee" min="0" step="0.01" required>
+
+                <!-- TPA Fee (Always Flat + Per Head) -->
+                <div class="form-subsection">
+                    <h3>TPA Fee (Flat + Per Participant)</h3>
+                    <div class="fee-flat-group">
+                        <div class="form-group">
+                            <label for="tpaFlatFee">Flat Annual Fee ($)</label>
+                            <input type="number" id="tpaFlatFee" name="tpaFlatFee" min="0" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tpaPerHeadFee">Per Participant Fee ($)</label>
+                            <input type="number" id="tpaPerHeadFee" name="tpaPerHeadFee" min="0" step="0.01" required>
+                        </div>
                     </div>
+                </div>
+
+                <!-- Investment Fee (Always Basis Points) -->
+                <div class="form-subsection">
+                    <h3>Investment Fee (Basis Points)</h3>
+                    <div class="form-group">
+                        <label for="investmentBasisPointsFee">Basis Points (0.01% = 1 bp)</label>
+                        <input type="number" id="investmentBasisPointsFee" name="investmentBasisPointsFee" min="0" max="500" step="0.1" required>
+                    </div>
+                </div>
+
+                <!-- Audit Fee (Always Basis Points) -->
+                <div class="form-subsection">
+                    <h3>Audit Fee (Basis Points)</h3>
+                    <div class="form-group">
+                        <label for="auditBasisPointsFee">Basis Points (0.01% = 1 bp)</label>
+                        <input type="number" id="auditBasisPointsFee" name="auditBasisPointsFee" min="0" max="500" step="0.1" required>
+                    </div>
+                </div>
+
+                <!-- Fee Payment Responsibility -->
+                <div class="form-row">
                     <div class="form-group">
                         <label for="feesPaidBy">Fees Paid By</label>
                         <select id="feesPaidBy" name="feesPaidBy" required>

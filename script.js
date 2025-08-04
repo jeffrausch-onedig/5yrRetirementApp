@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const maxAutoEscalationInput = document.getElementById('maxAutoEscalationRate');
     const enrollmentMethodSelect = document.getElementById('enrollmentMethod');
     const defaultAutoContribRateInput = document.getElementById('defaultAutoContribRate');
+    
+    // Fee structure elements
+    const recordKeeperFeeTypeRadios = document.querySelectorAll('input[name="recordKeeperFeeType"]');
+    const advisorFeeTypeRadios = document.querySelectorAll('input[name="advisorFeeType"]');
 
     // Auto escalation dependency
     autoEscalationSelect.addEventListener('change', function() {
@@ -31,6 +35,46 @@ document.addEventListener('DOMContentLoaded', function() {
             defaultAutoContribRateInput.value = defaultAutoContribRateInput.value || '3'; // Default to 3%
         }
     });
+
+    // Fee structure toggles
+    recordKeeperFeeTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            toggleFeeInputs('recordKeeper', this.value);
+        });
+    });
+
+    advisorFeeTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            toggleFeeInputs('advisor', this.value);
+        });
+    });
+
+    function toggleFeeInputs(feeType, structure) {
+        const basisPointsGroup = document.getElementById(`${feeType}BasisPointsGroup`);
+        const flatGroup = document.getElementById(`${feeType}FlatGroup`);
+        const basisPointsInput = document.getElementById(`${feeType}BasisPointsFee`);
+        const flatFeeInput = document.getElementById(`${feeType}FlatFee`);
+        const perHeadInput = document.getElementById(`${feeType}PerHeadFee`);
+
+        if (structure === 'basisPoints') {
+            basisPointsGroup.style.display = 'block';
+            flatGroup.style.display = 'none';
+            basisPointsInput.required = true;
+            flatFeeInput.required = false;
+            perHeadInput.required = false;
+            // Clear flat + per head values
+            flatFeeInput.value = '';
+            perHeadInput.value = '';
+        } else if (structure === 'flatPerHead') {
+            basisPointsGroup.style.display = 'none';
+            flatGroup.style.display = 'block';
+            basisPointsInput.required = false;
+            flatFeeInput.required = true;
+            perHeadInput.required = true;
+            // Clear basis points value
+            basisPointsInput.value = '';
+        }
+    }
 
     // Form validation
     function validateField(field) {
@@ -215,7 +259,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Format currency inputs
-    const currencyInputs = ['avgAccountBalance', 'avgSalary', 'recordKeeperFee', 'advisorFee', 'tpaFee', 'investmentFee', 'auditFee'];
+    const currencyInputs = ['avgAccountBalance', 'avgSalary', 'recordKeeperFlatFee', 'recordKeeperPerHeadFee', 
+                           'advisorFlatFee', 'advisorPerHeadFee', 'tpaFlatFee', 'tpaPerHeadFee'];
     currencyInputs.forEach(inputId => {
         const input = document.getElementById(inputId);
         if (input) {
@@ -232,6 +277,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Format percentage inputs
     const percentageInputs = ['investmentReturn', 'employeeContribRate', 'employerContribRate', 'employer401kMatch', 'participantsMaxMatch', 'maxAutoEscalationRate', 'defaultAutoContribRate'];
+    
+    // Format basis points inputs
+    const basisPointsInputs = ['recordKeeperBasisPointsFee', 'advisorBasisPointsFee', 'investmentBasisPointsFee', 'auditBasisPointsFee'];
     percentageInputs.forEach(inputId => {
         const input = document.getElementById(inputId);
         if (input) {
@@ -240,6 +288,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     const value = parseFloat(this.value);
                     if (!isNaN(value)) {
                         this.value = value.toFixed(2);
+                    }
+                }
+            });
+        }
+    });
+
+    basisPointsInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.addEventListener('blur', function() {
+                if (this.value) {
+                    const value = parseFloat(this.value);
+                    if (!isNaN(value)) {
+                        this.value = value.toFixed(1);
                     }
                 }
             });

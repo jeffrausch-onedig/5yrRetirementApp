@@ -35,13 +35,48 @@ document.addEventListener('DOMContentLoaded', function() {
     const avgTenure = parseFloat(setupData.avgTenure) || 5;
     const avgAge = parseInt(setupData.avgAge) || 42;
     
-    // Fees
-    const recordKeeperFee = parseFloat(setupData.recordKeeperFee) || 0;
-    const advisorFee = parseFloat(setupData.advisorFee) || 0;
-    const tpaFee = parseFloat(setupData.tpaFee) || 0;
-    const investmentFee = parseFloat(setupData.investmentFee) || 0;
-    const auditFee = parseFloat(setupData.auditFee) || 0;
+    // Fee structures and calculations
     const feesPaidBy = setupData.feesPaidBy || 'employer';
+    
+    // Parse fee data based on structure
+    const recordKeeperFeeType = setupData.recordKeeperFeeType;
+    const advisorFeeType = setupData.advisorFeeType;
+    
+    // Record Keeper fees
+    let recordKeeperFee = 0;
+    if (recordKeeperFeeType === 'basisPoints') {
+        const basisPoints = parseFloat(setupData.recordKeeperBasisPointsFee) || 0;
+        // Will be calculated as percentage of plan assets later
+        recordKeeperFee = { type: 'basisPoints', value: basisPoints };
+    } else if (recordKeeperFeeType === 'flatPerHead') {
+        const flatFee = parseFloat(setupData.recordKeeperFlatFee) || 0;
+        const perHeadFee = parseFloat(setupData.recordKeeperPerHeadFee) || 0;
+        recordKeeperFee = { type: 'flatPerHead', flat: flatFee, perHead: perHeadFee };
+    }
+    
+    // Advisor fees  
+    let advisorFee = 0;
+    if (advisorFeeType === 'basisPoints') {
+        const basisPoints = parseFloat(setupData.advisorBasisPointsFee) || 0;
+        advisorFee = { type: 'basisPoints', value: basisPoints };
+    } else if (advisorFeeType === 'flatPerHead') {
+        const flatFee = parseFloat(setupData.advisorFlatFee) || 0;
+        const perHeadFee = parseFloat(setupData.advisorPerHeadFee) || 0;
+        advisorFee = { type: 'flatPerHead', flat: flatFee, perHead: perHeadFee };
+    }
+    
+    // TPA fees (always flat + per head)
+    const tpaFlatFee = parseFloat(setupData.tpaFlatFee) || 0;
+    const tpaPerHeadFee = parseFloat(setupData.tpaPerHeadFee) || 0;
+    const tpaFee = { type: 'flatPerHead', flat: tpaFlatFee, perHead: tpaPerHeadFee };
+    
+    // Investment fees (always basis points)
+    const investmentBasisPoints = parseFloat(setupData.investmentBasisPointsFee) || 0;
+    const investmentFee = { type: 'basisPoints', value: investmentBasisPoints };
+    
+    // Audit fees (always basis points)
+    const auditBasisPoints = parseFloat(setupData.auditBasisPointsFee) || 0;
+    const auditFee = { type: 'basisPoints', value: auditBasisPoints };
 
     try {
         // Calculate projections for all scenarios
@@ -131,16 +166,42 @@ document.addEventListener('DOMContentLoaded', function() {
         // Total employer contribution = base employer contribution + match
         const totalMonthlyEmployerContrib = baseEmployerContrib + monthlyMatchContrib;
         
-        // Calculate annual fees paid by employees
-        let annualFeesPerEmployee = investmentFee; // Always paid by employee
-        if (feesPaidBy === 'employee') {
-            annualFeesPerEmployee += recordKeeperFee + advisorFee + tpaFee + auditFee;
-        } else if (feesPaidBy === 'split') {
-            annualFeesPerEmployee += (recordKeeperFee + advisorFee + tpaFee + auditFee) / 2;
+        // Fee calculation function - will be called each year with current balance
+        function calculateAnnualFees(currentPlanAssets) {
+            let totalAnnualFees = 0;
+            
+            // Calculate each fee based on its structure
+            const fees = [recordKeeperFee, advisorFee, tpaFee, investmentFee, auditFee];
+            
+            fees.forEach(fee => {
+                if (fee && fee.type === 'basisPoints') {
+                    // Basis points fees: (basis points / 10000) * plan assets
+                    totalAnnualFees += (fee.value / 10000) * currentPlanAssets;
+                } else if (fee && fee.type === 'flatPerHead') {
+                    // Flat + per participant fees
+                    totalAnnualFees += fee.flat + (fee.perHead * participants);
+                }
+            });
+            
+            // Investment fees are always paid by employees regardless of feesPaidBy setting
+            let feesOnEmployees = 0;
+            if (investmentFee && investmentFee.type === 'basisPoints') {
+                feesOnEmployees = (investmentFee.value / 10000) * currentPlanAssets;
+            }
+            
+            // Other fees depend on feesPaidBy setting
+            const otherFees = totalAnnualFees - feesOnEmployees;
+            
+            if (feesPaidBy === 'employee') {
+                feesOnEmployees += otherFees;
+            } else if (feesPaidBy === 'split') {
+                feesOnEmployees += otherFees / 2;
+            }
+            // If feesPaidBy === 'employer', feesOnEmployees remains just investment fees
+            
+            // Return per-participant fee impact
+            return participants > 0 ? feesOnEmployees / participants : 0;
         }
-        
-        // Divide annual fees by participants to get per-person impact
-        const annualFeePerPerson = participants > 0 ? annualFeesPerEmployee / participants : 0;
         
         let currentBalance = avgAccountBalance;
         let currentEmployeeRate = effectiveEmployeeRate;
@@ -181,7 +242,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 totalInvestmentGrowth += monthlyGrowth;
             }
             
-            // Deduct annual fees at year end
+            // Calculate and deduct annual fees at year end based on current plan assets
+            const totalPlanAssets = currentBalance * participants; // Approximate total plan assets
+            const annualFeePerPerson = calculateAnnualFees(totalPlanAssets);
             currentBalance -= annualFeePerPerson;
             totalAnnualFees = annualFeePerPerson;
             
