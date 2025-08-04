@@ -229,6 +229,77 @@ header h1 {
     }
 }
 
+/* Help Icon and Tooltip Styles */
+.field-help {
+    position: relative;
+    display: inline-block;
+    margin-left: 6px;
+    cursor: help;
+}
+
+.help-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #6c757d;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.help-icon:hover {
+    background: #667eea;
+}
+
+.field-help:hover .help-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.help-tooltip {
+    visibility: hidden;
+    opacity: 0;
+    width: 280px;
+    background-color: #2c3e50;
+    color: white;
+    text-align: left;
+    border-radius: 6px;
+    padding: 10px;
+    position: absolute;
+    z-index: 1000;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -140px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    font-weight: normal;
+}
+
+.help-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #2c3e50 transparent transparent transparent;
+}
+
+@media (max-width: 768px) {
+    .help-tooltip {
+        width: 250px;
+        margin-left: -125px;
+        font-size: 0.8rem;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
