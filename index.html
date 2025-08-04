@@ -89,7 +89,7 @@
                         <label for="employerContribRate">Employer Contribution Rate (%)
                             <span class="field-help">
                                 <div class="help-icon">?</div>
-                                <div class="help-tooltip">Base employer contribution rate (separate from matching). This is a flat contribution the employer makes regardless of employee participation. Enter 0 if no base contribution exists.</div>
+                                <div class="help-tooltip">Average amount the employer currently contributes per employee as % of salary. This is mostly from matching programs based on actual participant behavior, not the maximum possible match.</div>
                             </span>
                         </label>
                         <input type="number" id="employerContribRate" name="employerContribRate" min="0" max="100" step="0.01" required>
@@ -100,7 +100,7 @@
                         <label for="employer401kMatch">Employer 401k Match (%)
                             <span class="field-help">
                                 <div class="help-icon">?</div>
-                                <div class="help-tooltip">Maximum employer match rate as a percentage of salary. Common examples: 3% (100% match on first 3%), 1.5% (50% match on first 3%), or 4% (100% match on first 4%).</div>
+                                <div class="help-tooltip">Maximum possible employer match rate as % of salary. Used to model expansion potential if more participants maximized their match. Common examples: 3% (100% match on first 3%), 1.5% (50% match on first 3%).</div>
                             </span>
                         </label>
                         <input type="number" id="employer401kMatch" name="employer401kMatch" min="0" max="100" step="0.01" required>

@@ -153,18 +153,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const monthlyReturn = investmentReturn / 100 / monthsPerYear;
         const monthlyEmployeeContrib = (effectiveEmployeeRate / 100) * avgSalary / monthsPerYear;
         
-        // Calculate employer contributions (includes both base employer contribution AND match)
-        // Base employer contribution rate from form
-        const baseEmployerContrib = (employerContribRate / 100) * avgSalary / monthsPerYear;
+        // Employer contribution calculation
+        // employerContribRate = current average employer contribution (mostly from existing matching)
+        // employer401kMatch = maximum possible match rate (for modeling expansion scenarios)
         
-        // Calculate actual match based on employee contribution and utilization
-        // Match is limited by the employee's contribution rate and the match utilization percentage
-        const employeeContribForMatch = Math.min(effectiveEmployeeRate, employer401kMatch); // Can't match more than employee contributes
-        const actualMatchRate = employeeContribForMatch * (effectiveMatchUtilization / 100);
-        const monthlyMatchContrib = (actualMatchRate / 100) * avgSalary / monthsPerYear;
+        let monthlyEmployerContrib;
         
-        // Total employer contribution = base employer contribution + match
-        const totalMonthlyEmployerContrib = baseEmployerContrib + monthlyMatchContrib;
+        if (scenario === 'current') {
+            // Use the actual current employer contribution rate (what they're currently contributing on average)
+            monthlyEmployerContrib = (employerContribRate / 100) * avgSalary / monthsPerYear;
+        } else {
+            // For improvement scenarios, model based on maximum match potential
+            // Calculate what employer would contribute if match utilization improved
+            const employeeContribForMatch = Math.min(effectiveEmployeeRate, employer401kMatch);
+            const projectedMatchRate = employeeContribForMatch * (effectiveMatchUtilization / 100);
+            monthlyEmployerContrib = (projectedMatchRate / 100) * avgSalary / monthsPerYear;
+        }
         
         // Fee calculation function - will be called each year with current balance
         function calculateAnnualFees(currentPlanAssets) {
@@ -223,16 +227,24 @@ document.addEventListener('DOMContentLoaded', function() {
             // Recalculate contributions with current rate (for auto-escalation)
             const currentMonthlyEmployeeContrib = (currentEmployeeRate / 100) * avgSalary / monthsPerYear;
             
-            // Recalculate employer match based on current employee contribution rate
-            const currentEmployeeContribForMatch = Math.min(currentEmployeeRate, employer401kMatch);
-            const currentActualMatchRate = currentEmployeeContribForMatch * (effectiveMatchUtilization / 100);
-            const currentMonthlyMatchContrib = (currentActualMatchRate / 100) * avgSalary / monthsPerYear;
-            const currentTotalMonthlyEmployerContrib = baseEmployerContrib + currentMonthlyMatchContrib;
+            // Recalculate employer contribution based on scenario and current employee rate
+            let currentMonthlyEmployerContrib;
+            
+            if (scenario === 'current') {
+                // For current scenario, employer contribution doesn't change with auto-escalation
+                // It's based on actual current average contribution rate
+                currentMonthlyEmployerContrib = monthlyEmployerContrib;
+            } else {
+                // For improvement scenarios, recalculate based on current employee contribution and improved match utilization
+                const currentEmployeeContribForMatch = Math.min(currentEmployeeRate, employer401kMatch);
+                const currentProjectedMatchRate = currentEmployeeContribForMatch * (effectiveMatchUtilization / 100);
+                currentMonthlyEmployerContrib = (currentProjectedMatchRate / 100) * avgSalary / monthsPerYear;
+            }
             
             // Monthly compounding for the year
             for (let month = 0; month < monthsPerYear; month++) {
-                // Add monthly contributions (employee + employer including match)
-                const monthlyContributions = currentMonthlyEmployeeContrib + currentTotalMonthlyEmployerContrib;
+                // Add monthly contributions (employee + employer)
+                const monthlyContributions = currentMonthlyEmployeeContrib + currentMonthlyEmployerContrib;
                 currentBalance += monthlyContributions;
                 totalAnnualContributions += monthlyContributions;
                 
