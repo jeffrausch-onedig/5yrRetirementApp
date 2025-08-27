@@ -12,6 +12,7 @@
     <h2>Test Form Submission</h2>
     <button onclick="testFormSubmission()">Test Form Data</button>
     <button onclick="goToResults()">Go to Results</button>
+    <button onclick="goToEngagement()">Go to Engagement</button>
     
     <h2>Debug Info</h2>
     <div id="debug"></div>
@@ -21,15 +22,15 @@
             // Create test data
             const testData = {
                 eligibleEmployees: "100",
-                participants: "80",
+                participants: "65",
                 avgAccountBalance: "50000",
                 avgSalary: "75000",
                 investmentReturn: "7",
-                employeeContribRate: "6",
+                employeeContribRate: "5.5",
                 employerContribRate: "3",
                 employer401kMatch: "3",
-                participantsMaxMatch: "100",
-                autoEscalation: "yes",
+                participantsMaxMatch: "75",
+                autoEscalation: "no",
                 maxAutoEscalationRate: "10",
                 recordKeeperFeeType: "basisPoints",
                 recordKeeperBasisPointsFee: "50",
@@ -40,7 +41,14 @@
                 tpaPerHeadFee: "15",
                 investmentBasisPointsFee: "75",
                 auditBasisPointsFee: "25",
-                feesPaidBy: "employee"
+                feesPaidBy: "employee",
+                // Engagement-specific fields
+                enrollmentMethod: "opt-in",
+                defaultAutoContribRate: "3",
+                vestingSchedule: "3-year",
+                investmentOptions: "18",
+                avgTenure: "4.2",
+                avgAge: "38"
             };
             
             // Store test data
@@ -51,6 +59,10 @@
         
         function goToResults() {
             window.location.href = 'results.html';
+        }
+        
+        function goToEngagement() {
+            window.location.href = 'engagement.html';
         }
         
         // Check if data exists
